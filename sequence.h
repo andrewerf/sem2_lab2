@@ -13,29 +13,32 @@ protected:
 	typedef const typename std::remove_reference<T>::type& const_ref;
 public:
 
-	 ref get(size_t i);
-	 ref getFirst() {return get(0);}
-	 ref getLast() {return get(length());}
+	virtual ref get(size_t i) = 0;
+	virtual ref getFirst() {return get(0);}
+	virtual ref getLast() {return get(size()-1);}
 
-	 const_ref get(size_t i) const;
-	 const_ref getFirst() const {return get(0);}
-	 const_ref getLast() const {return get(length());}
+	virtual const_ref get(size_t i) const = 0;
+	virtual const_ref getFirst() const {return get(0);}
+	virtual const_ref getLast() const {return get(size()-1);}
 
-	 size_t length() const noexcept;
+	virtual size_t size() const noexcept = 0;
 
-	 void insert(size_t i, T&& val);
-	 void insert(size_t i, const T &val);
+	virtual void insert(size_t i, T&& val) = 0;
+	virtual void insert(size_t i, const T &val) = 0;
 
-	 void append(T&& val);
-	 void append(const T &val);
-	 void prepend(T&& val);
-	 void prepend(const T &val);
+	virtual void append(T&& val) = 0;
+	virtual void append(const T &val) = 0;
+	virtual void prepend(T&& val) = 0;
+	virtual void prepend(const T &val) = 0;
 
-	 Sequence<T>* operator[](std::pair<size_t, size_t> range);
-	 Sequence<T>* getSubsequence(size_t from, size_t to);
+	virtual ref operator[](size_t i) = 0;
+	virtual const_ref operator[](size_t i) const = 0;
 
-	 Sequence<T>* concat(Sequence<T> *list);
-	 Sequence<T>* operator +(Sequence<T> *a);
+	virtual Sequence<T>* operator[](std::pair<size_t, size_t> range) const = 0;
+	virtual Sequence<T>* getSubsequence(size_t from, size_t to) const = 0;
+
+	virtual Sequence<T>* concat(Sequence<T> *list) const = 0;
+	virtual Sequence<T>* operator +(Sequence<T> *a) const = 0;
 };
 
 

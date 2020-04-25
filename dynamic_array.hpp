@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include "allocator.hpp"
 
+#include <iostream>
+
 
 template<typename T>
 class DynamicArray {
@@ -17,7 +19,12 @@ public:
 	DynamicArray(size_t count) noexcept;
 	DynamicArray(size_t count, const T& val);
 
-	template<typename TIter>
+	template<typename TIter,
+			 typename = typename std::enable_if<
+										!std::is_same<
+											typename std::remove_reference<T>::type,
+											typename std::remove_reference<TIter>::type>::value,
+										TIter>::type>
 	DynamicArray(TIter begin, TIter end) noexcept;
 
 	DynamicArray(T *array, size_t count) noexcept;
@@ -85,10 +92,12 @@ DynamicArray<T>::DynamicArray(size_t count, const T& val):
 }
 
 template<typename T>
-template<typename TIter>
+template<typename TIter,
+		 typename>
 DynamicArray<T>::DynamicArray(TIter begin, TIter end) noexcept :
 	DynamicArray(end - begin)
 {
+	_count = end - begin;
 	for(size_t i = 0; begin != end; ++begin, ++i){
 		_assign(i, *begin);
 	}

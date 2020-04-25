@@ -28,7 +28,7 @@ public:
 	typename Sequence<T>::ref get(size_t i) {return _array->get(i);}
 	typename Sequence<T>::const_ref get(size_t i) const {return _array->get(i);}
 
-	size_t length() const noexcept {return _array->size();}
+	size_t size() const noexcept {return _array->size();}
 
 	void insert(size_t i, T&& val) {_insert(i, std::move(val));}
 	void insert(size_t i, const T &val) {_insert(i, val);}
@@ -38,11 +38,14 @@ public:
 	void prepend(T&& val) {_insert(0, std::move(val));}
 	void prepend(const T &val) {_insert(0, val);}
 
-	ArraySequence<T>* operator[](std::pair<size_t, size_t> range) const {return getSubsequence(range.first, range.second);}
-	ArraySequence<T>* getSubsequence(size_t from, size_t to) const;
+	typename Sequence<T>::ref operator[](size_t i) {return (*_array)[i];}
+	typename Sequence<T>::const_ref operator[](size_t i) const {return (*_array)[i];}
 
-	ArraySequence<T>* concat(ArraySequence<T> *list) const;
-	ArraySequence<T>* operator +(ArraySequence<T> *a) const {return concat(a);}
+	Sequence<T>* operator[](std::pair<size_t, size_t> range) const {return getSubsequence(range.first, range.second);}
+	Sequence<T>* getSubsequence(size_t from, size_t to) const;
+
+	Sequence<T>* concat(Sequence<T> *list) const;
+	Sequence<T>* operator +(Sequence<T> *a) const {return concat(a);}
 
 private:
 	template<typename TVal>
@@ -64,22 +67,21 @@ ArraySequence<T>::ArraySequence(ArraySequence<T>&& array) noexcept :
 {}
 
 template<typename T>
-ArraySequence<T> *ArraySequence<T>::getSubsequence(size_t from, size_t to) const
+Sequence<T> *ArraySequence<T>::getSubsequence(size_t from, size_t to) const
 {
-	return new ArraySequence<T>(_array->get(from), (to - from));
+	return new ArraySequence<T>(&_array->get(from), &_array->get(to));
 }
 
 template<typename T>
-ArraySequence<T> *ArraySequence<T>::concat(ArraySequence<T> *list) const
+Sequence<T> *ArraySequence<T>::concat(Sequence<T> *list) const
 {
-	size_t n = _array->size() + list->length();
+//	size_t n = _array->size() + list->length();
 	auto res = new ArraySequence<T>();
-	res->reserve(n);
 	for(size_t i = 0; i < _array->size(); ++i){
-		res->append(_array[i]);
+		res->append(_array->get(i));
 	}
-	for(size_t i = 0; i < list->length(); ++i){
-		res.append(list->get(i));
+	for(size_t i = 0; i < list->size(); ++i){
+		res->append(list->get(i));
 	}
 
 	return res;
