@@ -79,7 +79,7 @@ template<typename T>
 DynamicArray<T>::DynamicArray(size_t count) noexcept :
 	DynamicArray()
 {
-	_allocate(count);
+	resize(count);
 }
 
 template<typename T>
@@ -88,7 +88,6 @@ DynamicArray<T>::DynamicArray(size_t count, const T& val):
 {
 	for(size_t i = 0; i < count; ++i)
 		_assign(i, val);
-	_count = count;
 }
 
 template<typename T>
@@ -97,7 +96,6 @@ template<typename TIter,
 DynamicArray<T>::DynamicArray(TIter begin, TIter end) noexcept :
 	DynamicArray(end - begin)
 {
-	_count = end - begin;
 	for(size_t i = 0; begin != end; ++begin, ++i){
 		_assign(i, *begin);
 	}

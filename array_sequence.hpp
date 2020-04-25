@@ -75,8 +75,9 @@ Sequence<T> *ArraySequence<T>::getSubsequence(size_t from, size_t to) const
 template<typename T>
 Sequence<T> *ArraySequence<T>::concat(Sequence<T> *list) const
 {
-//	size_t n = _array->size() + list->length();
+	size_t n = _array->size() + list->size();
 	auto res = new ArraySequence<T>();
+	res->_array->reserve(n);
 	for(size_t i = 0; i < _array->size(); ++i){
 		res->append(_array->get(i));
 	}
