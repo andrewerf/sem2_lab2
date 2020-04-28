@@ -17,7 +17,9 @@ class DynamicArray {
 public:
 	DynamicArray() noexcept;
 	DynamicArray(size_t count) noexcept;
-	DynamicArray(size_t count, const T& val);
+
+	template<typename V>
+	DynamicArray(size_t count, V&& val);
 
 	template<typename TIter,
 			 typename = typename std::enable_if<
@@ -41,13 +43,15 @@ public:
 	size_t size() const noexcept {return _count;}
 
 
-	void set(size_t i, T&& val);
-	void set(size_t i, const T &val);
+	template<typename V>
+	void set(size_t i, V&& val);
+
 	void erase(size_t i) {erase(i, i+1);}
 	void erase(size_t from, size_t to);
 
-	void push_back(T&& val);
-	void push_back(const T &val);
+	template<typename V>
+	void push_back(V&& val);
+
 	void swap(size_t i, size_t j);
 
 	void reserve(size_t new_capacity) noexcept;
@@ -83,11 +87,12 @@ DynamicArray<T>::DynamicArray(size_t count) noexcept :
 }
 
 template<typename T>
-DynamicArray<T>::DynamicArray(size_t count, const T& val):
+template<typename V>
+DynamicArray<T>::DynamicArray(size_t count, V&& val):
 	DynamicArray(count)
 {
 	for(size_t i = 0; i < count; ++i)
-		_assign(i, val);
+		_assign(i, std::forward<V>(val));
 }
 
 template<typename T>
@@ -144,42 +149,27 @@ void DynamicArray<T>::erase(size_t from, size_t to)
 
 
 template<typename T>
-void DynamicArray<T>::set(size_t i, T&& val)
+template<typename V>
+void DynamicArray<T>::set(size_t i, V&& val)
 {
 	if(i > _count)
 		throw std::out_of_range("DynamicArray out of range!");
 
-	_assign(i, std::move(val));
+	_assign(i, std::forward<V>(val));
 }
 
-template<typename T>
-void DynamicArray<T>::set(size_t i, const T &val)
-{
-	if(i > _count)
-		throw std::out_of_range("DynamicArray out of range!");
-
-	_assign(i, val);
-}
 
 template<typename T>
-void DynamicArray<T>::push_back(T&& val)
+template<typename V>
+void DynamicArray<T>::push_back(V&& val)
 {
 	if(_count == _allocated){
 		_allocate();
 	}
 
-	_assign(_count++, std::move(val));
+	_assign(_count++, std::forward<V>(val));
 }
 
-template<typename T>
-void DynamicArray<T>::push_back(const T &val)
-{
-	if(_count == _allocated){
-		_allocate();
-	}
-
-	_assign(_count++, val);
-}
 
 template<typename T>
 void DynamicArray<T>::swap(size_t i, size_t j)
@@ -239,7 +229,7 @@ template<typename T>
 template<typename TVal>
 void DynamicArray<T>::_assign(size_t i, TVal&& val)
 {
-	_array[i] = T(std::forward<TVal>(val));
+	new(_array + i) T(std::forward<TVal>(val));
 }
 
 template<typename T>
