@@ -9,14 +9,6 @@
 template <typename T>
 class ArraySequence : public Sequence<T> {
 public:
-/*	ArraySequence() noexcept;
-	ArraySequence(size_t count) noexcept;
-
-	template<typename TIter>
-	ArraySequence(TIter begin, TIter end) noexcept;
-
-	ArraySequence(T *array, size_t count) noexcept;*/
-
 	ArraySequence() : _array(new DynamicArray<T>) {}
 
 	template <typename ...Args>
@@ -25,21 +17,18 @@ public:
 	ArraySequence(const ArraySequence<T> &array) noexcept;
 	ArraySequence(ArraySequence<T> &&array) noexcept;
 
-	typename Sequence<T>::ref get(size_t i) {return _array->get(i);}
-	typename Sequence<T>::const_ref get(size_t i) const {return _array->get(i);}
+	T& get(size_t i) {return _array->get(i);}
+	const T& get(size_t i) const {return _array->get(i);}
 
 	size_t size() const noexcept {return _array->size();}
 
-	void insert(size_t i, T&& val) {_insert(i, std::move(val));}
 	void insert(size_t i, const T &val) {_insert(i, val);}
 
-	void append(T&& val) {_array->push_back(std::move(val));}
 	void append(const T &val) {_array->push_back(val);}
-	void prepend(T&& val) {_insert(0, std::move(val));}
 	void prepend(const T &val) {_insert(0, val);}
 
-	typename Sequence<T>::ref operator[](size_t i) {return (*_array)[i];}
-	typename Sequence<T>::const_ref operator[](size_t i) const {return (*_array)[i];}
+	T& operator[](size_t i) {return (*_array)[i];}
+	const T& operator[](size_t i) const {return (*_array)[i];}
 
 	Sequence<T>* operator[](std::pair<size_t, size_t> range) const {return getSubsequence(range.first, range.second);}
 	Sequence<T>* getSubsequence(size_t from, size_t to) const;
