@@ -15,8 +15,8 @@ class DynamicArray {
 	typedef typename std::remove_reference<T>::type& ref;
 	typedef const typename std::remove_reference<T>::type& const_ref;
 public:
-	DynamicArray() noexcept;
-	DynamicArray(size_t count) noexcept;
+	DynamicArray();
+	DynamicArray(size_t count);
 
 	template<typename V>
 	DynamicArray(size_t count, V&& val);
@@ -27,11 +27,17 @@ public:
 											typename std::remove_reference<T>::type,
 											typename std::remove_reference<TIter>::type>::value,
 										TIter>::type>
-	DynamicArray(TIter begin, TIter end) noexcept;
+	DynamicArray(TIter begin, TIter end);
 
-	DynamicArray(T *array, size_t count) noexcept;
-	DynamicArray(const DynamicArray<T> &array) noexcept;
-	DynamicArray(DynamicArray<T> &&array) noexcept;
+	DynamicArray(T *array, size_t count, bool wrapper = false);
+	DynamicArray(const DynamicArray<T> &array);
+	DynamicArray(DynamicArray<T> &&array);
+
+	DynamicArray& operator= (const DynamicArray<T> &array);
+	DynamicArray& operator= (DynamicArray<T> &&array);
+
+	bool operator== (const DynamicArray<T> &array) const;
+	bool operator!= (const DynamicArray<T> &array) const {return !(array == *this);}
 
 
 	ref get(size_t i) {_check_range(i); return _array[i];}
@@ -41,6 +47,8 @@ public:
 	const_ref operator[](size_t i) const noexcept {return _array[i];}
 
 	size_t size() const noexcept {return _count;}
+
+	bool is_wrapper() const {return _is_wrapper;}
 
 
 	template<typename V>
@@ -54,7 +62,7 @@ public:
 
 	void swap(size_t i, size_t j);
 
-	void reserve(size_t new_capacity) noexcept;
+	void reserve(size_t new_capacity);
 	void resize(size_t new_size);
 	void clear();
 
@@ -64,23 +72,24 @@ private:
 
 	template<typename TVal>
 	void _assign(size_t i, TVal&& val);
-	void _allocate(size_t new_capacity = 0) noexcept;
+	void _allocate(size_t new_capacity = 0);
 
 	T* _array;
 	size_t _count;
 	size_t _allocated;
+	bool _is_wrapper = false;
 };
 
 
 
 template<typename T>
-DynamicArray<T>::DynamicArray() noexcept :
+DynamicArray<T>::DynamicArray() :
 	_count(0),
 	_allocated(0)
 {}
 
 template<typename T>
-DynamicArray<T>::DynamicArray(size_t count) noexcept :
+DynamicArray<T>::DynamicArray(size_t count) :
 	DynamicArray()
 {
 	resize(count);
@@ -98,7 +107,7 @@ DynamicArray<T>::DynamicArray(size_t count, V&& val):
 template<typename T>
 template<typename TIter,
 		 typename>
-DynamicArray<T>::DynamicArray(TIter begin, TIter end) noexcept :
+DynamicArray<T>::DynamicArray(TIter begin, TIter end) :
 	DynamicArray(end - begin)
 {
 	for(size_t i = 0; begin != end; ++begin, ++i){
@@ -107,16 +116,17 @@ DynamicArray<T>::DynamicArray(TIter begin, TIter end) noexcept :
 }
 
 template<typename T>
-DynamicArray<T>::DynamicArray(T *array, size_t count) noexcept :
+DynamicArray<T>::DynamicArray(T *array, size_t count, bool wrapper) :
 	_array(array),
 	_count(count),
-	_allocated(count)
+	_allocated(count),
+	_is_wrapper(wrapper)
 {
 	array = nullptr;
 }
 
 template<typename T>
-DynamicArray<T>::DynamicArray(const DynamicArray<T> &array) noexcept :
+DynamicArray<T>::DynamicArray(const DynamicArray<T> &array) :
 	DynamicArray(array._count)
 {
 	for(size_t i = 0; i < _count; ++i){
@@ -125,13 +135,45 @@ DynamicArray<T>::DynamicArray(const DynamicArray<T> &array) noexcept :
 }
 
 template<typename T>
-DynamicArray<T>::DynamicArray(DynamicArray<T> &&array) noexcept :
+DynamicArray<T>::DynamicArray(DynamicArray<T> &&array) :
 	_array(array._array),
 	_count(array._count),
-	_allocated(array._allocated)
+	_allocated(array._allocated),
+	_is_wrapper(array._is_wrapper)
 {
 	array._array = nullptr;
 	array._count = 0;
+}
+
+template<typename T>
+DynamicArray<T>& DynamicArray<T>::operator=(const DynamicArray<T> &array)
+{
+	clear();
+	for(size_t i = 0; i < array.size(); ++i){
+		_assign(i, array[i]);
+	}
+	_count = array.size();
+}
+
+template<typename T>
+DynamicArray<T>& DynamicArray<T>::operator=(DynamicArray<T> &&array)
+{
+	clear();
+	for(size_t i = 0; i < array.size(); ++i){
+		_assign(i, std::move(array[i]));
+	}
+	array._allocated = 0;
+	_count = array.size();
+	_is_wrapper = array._is_wrapper;
+}
+
+template<typename T>
+bool DynamicArray<T>::operator== (const DynamicArray<T> &array) const
+{
+	bool ret = (array.size() == size());
+	for(size_t i = 0; i < array.size() && ret; ++i)
+		ret = (array[i] == _array[i]);
+	return ret;
 }
 
 
@@ -184,7 +226,7 @@ void DynamicArray<T>::swap(size_t i, size_t j)
 
 
 template<typename T>
-void DynamicArray<T>::reserve(size_t new_capacity) noexcept
+void DynamicArray<T>::reserve(size_t new_capacity)
 {
 	if(new_capacity > _allocated){
 		_allocate(new_capacity);
@@ -213,8 +255,10 @@ void DynamicArray<T>::clear()
 template<typename T>
 DynamicArray<T>::~DynamicArray()
 {
-	if(_count > 0)
-		free(_array);
+	if(_allocated > 0 && _array != nullptr && !_is_wrapper){
+		delete[] _array;
+		_array = nullptr;
+	}
 	_count = 0;
 }
 
@@ -233,7 +277,7 @@ void DynamicArray<T>::_assign(size_t i, TVal&& val)
 }
 
 template<typename T>
-void DynamicArray<T>::_allocate(size_t new_capacity) noexcept
+void DynamicArray<T>::_allocate(size_t new_capacity)
 {
 	if(_allocated == 0){
 		_array = (T*)malloc(10 * sizeof(T));
