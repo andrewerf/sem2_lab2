@@ -39,6 +39,7 @@ public:
 	Sequence<T>* concat(Sequence<T> *list) const;
 	Sequence<T>* operator +(Sequence<T> *a) const {return concat(a);}
 
+	~ArraySequence();
 private:
 	template<typename TVal>
 	void _insert(size_t i, TVal&& val);
@@ -57,6 +58,13 @@ template<typename T>
 ArraySequence<T>::ArraySequence(ArraySequence<T>&& array) noexcept :
 	_array(new DynamicArray<T>(std::move(array._array)))
 {}
+
+
+template<typename T>
+ArraySequence<T>::~ArraySequence()
+{
+	delete _array;
+}
 
 template<typename T>
 Sequence<T> *ArraySequence<T>::getSubsequence(size_t from, size_t to) const

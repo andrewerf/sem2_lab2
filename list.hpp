@@ -142,6 +142,10 @@ List<T>::List(List<T> &&list) :
 	_pre_head = list._pre_head;
 	_tail = list._tail;
 	_count = list._count;
+
+	list._count = 0;
+	list._pre_head->next = nullptr;
+	list._tail = nullptr;
 }
 
 template<typename T>
@@ -168,7 +172,9 @@ List<T> &List<T>::operator=(List<T> &&list)
 	_pre_head->next = list._pre_head->next;
 	_tail = list._tail;
 
-	list.clear();
+	list._tail = 0;
+	list._pre_head->next = nullptr;
+	list._count = 0;
 }
 
 template<typename T>

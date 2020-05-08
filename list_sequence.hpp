@@ -39,17 +39,28 @@ public:
 	Sequence<T>* concat(Sequence<T> *seq) const;
 	Sequence<T>* operator +(Sequence<T> *a) const {return concat(a);}
 
+	~ListSequence();
 private:
 	List<T> *_list;
 };
 
 
+
+template<typename T>
+ListSequence<T>::~ListSequence()
+{
+	delete _list;
+}
+
 template<typename T>
 Sequence<T>* ListSequence<T>::getSubsequence(size_t from, size_t to) const
 {
-	List<T> *subseq = new List<T>((*_list)[{from, to}]);
+	List<T> s = (*_list)[{from, to}];
+	List<T> *subseq = new List<T>(s);
 	ListSequence<T> *ret = new ListSequence<T>;
 	ret->_list = subseq;
+
+	return ret;
 }
 
 template<typename T>

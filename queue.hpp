@@ -7,7 +7,7 @@
 template <typename T>
 class Queue {
 public:
-	Queue(){}
+	Queue() : _list(new ListSequence<T>){}
 
 	template <typename ...Args>
 	Queue(Args&&... args) : _list(new ListSequence<T>(std::forward<Args>(args)...)) {}
