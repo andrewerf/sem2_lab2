@@ -6,6 +6,8 @@
 #include "list.hpp"
 #include "list_sequence.hpp"
 
+#include "queue.hpp"
+
 
 void test_dynamic_array_basics()
 {
@@ -50,10 +52,9 @@ void test_dynamic_array_operations()
 	assert_equal(array2, DynamicArray<int>());
 }
 
-
 void test_array_sequence_basics()
 {
-	int a[] = {0, 1, 2, 3, 6, 7, 8, 9};
+	int a[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
 	//forward constructor
 	ArraySequence<int> s1(a, 10, true);
@@ -65,7 +66,7 @@ void test_array_sequence_basics()
 
 void test_array_sequence_operations()
 {
-	int a[] = {0, 1, 2, 3, 6, 7, 8, 9};
+	int a[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 	auto s1 = new ArraySequence<int>();
 
 	for(size_t i = 0; i < 10; ++i){
@@ -129,7 +130,7 @@ void test_list_operations()
 
 void test_list_sequence_basics()
 {
-	int a[] = {0, 1, 2, 3, 6, 7, 8, 9};
+	int a[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
 	//forward constructor
 	ListSequence<int> s1(a, 10);
@@ -141,7 +142,7 @@ void test_list_sequence_basics()
 
 void test_list_sequence_operations()
 {
-	int a[] = {0, 1, 2, 3, 6, 7, 8, 9};
+	int a[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 	auto s1 = new ListSequence<int>();
 
 	for(size_t i = 0; i < 10; ++i){
@@ -160,6 +161,54 @@ void test_list_sequence_operations()
 }
 
 
+void test_queue()
+{
+	int a[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+	//forward constructor
+	Queue<int> q1(a, 10);
+	Queue<int> q2(a, a+10);
+
+	for(size_t i = 0; i < 10; ++i)
+		assert_equal(q1.pop(), q2.pop());
+
+	assert_equal(q1.size(), 0);
+	assert_equal(q2.size(), 0);
+}
+
+
+void test_map()
+{
+	int a[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+	Sequence<int> *s = new ArraySequence<int>(a, 10, true);
+
+	ArraySequence<int> *s1 = map(static_cast<ArraySequence<int>*>(s), [](int x){return x*x;});
+
+	for(size_t i = 0; i < 10; ++i)
+		assert_equal(s1->get(i), i*i);
+}
+
+void test_where()
+{
+	int a[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+	Sequence<int> *s = new ArraySequence<int>(a, 10, true);
+
+	ArraySequence<int> *s1 = where(static_cast<ArraySequence<int>*>(s), [](int x){return x >= 5;});
+
+	for(size_t i = 5; i < 10; ++i)
+		assert_equal(s1->get(i-5), i);
+}
+
+void test_reduce()
+{
+	int a[] = {1, 2, 3};
+	ArraySequence<int> *s = new ArraySequence<int>(a, 3, true);
+
+	int ret = reduce(s, [](int a, int b){return 2*a+3*b;}, 4);
+
+	assert_equal(ret, 144);
+}
+
 
 int main(){
 
@@ -172,7 +221,12 @@ int main(){
 		{"list_basics", test_list_basics},
 		{"list_operations", test_list_operations},
 		{"list_sequence_basics", test_list_sequence_basics},
-		{"list_sequence_operations", test_list_sequence_operations}
+		{"list_sequence_operations", test_list_sequence_operations},
+
+		{"queue", test_queue},
+		{"map", test_map},
+		{"where", test_where},
+		{"reduce", test_reduce}
 	};
 	const unsigned short n = sizeof(functions) / sizeof (TestFunction<Error>);
 	unsigned short errors = 0;

@@ -15,7 +15,7 @@ public:
 	ListSequence(Args&&... args) : _list(new List<T>(std::forward<Args>(args)...)) {}
 
 	ListSequence(const ListSequence<T> &list) noexcept : _list(new List<T>(list._list)) {}
-	ListSequence(ListSequence<T> &&list) noexcept : _list(new List<T>(move(list._list))) {}
+	ListSequence(ListSequence<T> &&list) noexcept : _list(new List<T>(std::move(list._list))) {}
 
 	T& get(size_t i) {return _list->get(i);}
 	const T& get(size_t i) const {return _list->get(i);}
@@ -26,6 +26,9 @@ public:
 
 	void append(const T &val) {_list->append(val);}
 	void prepend(const T &val) {_list->prepend(val);}
+
+	void erase(size_t i) {_list->erase(i);}
+	void erase(size_t from, size_t to) {_list->erase(from, to);}
 
 	T& operator[](size_t i) {return get(i);}
 	const T& operator[](size_t i) const {return get(i);}

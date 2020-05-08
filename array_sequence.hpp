@@ -27,6 +27,9 @@ public:
 	void append(const T &val) {_array->push_back(val);}
 	void prepend(const T &val) {_insert(0, val);}
 
+	void erase(size_t i) {_array->erase(i);}
+	void erase(size_t from, size_t to) {_array->erase(from, to);}
+
 	T& operator[](size_t i) {return (*_array)[i];}
 	const T& operator[](size_t i) const {return (*_array)[i];}
 
