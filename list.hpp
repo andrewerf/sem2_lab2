@@ -8,10 +8,10 @@
 template<typename T>
 class List {
 public:
-	List() noexcept;
+	List();
 
 	template<typename V>
-	List(size_t count, V&& val) noexcept;
+	List(size_t count, V&& val);
 
 	template<typename TIter,
 			 typename = typename std::enable_if<
@@ -19,13 +19,19 @@ public:
 											typename std::remove_reference<T>::type,
 											typename std::remove_reference<TIter>::type>::value,
 										TIter>::type>
-	List(TIter begin, TIter end) noexcept;
+	List(TIter begin, TIter end);
 
 
-	List(T *array, size_t count) noexcept;
-	List(const List<T> &list) noexcept;
-	List(List<T> &&list) noexcept;
+	List(T *array, size_t count);
+	List(const List<T> &list);
+	List(List<T> &&list);
 
+
+	List& operator= (const List<T> &list);
+	List& operator= (List<T> &&list);
+
+	bool operator== (const List<T> &list) const;
+	bool operator!= (const List<T> &list) const {return !(list == *this);}
 
 	T& getFirst() {return get(0);}
 	const T& getFirst() const {return get(0);}
@@ -54,11 +60,16 @@ public:
 	template<typename V>
 	void prepend(V&& val) noexcept {_insert(0, std::forward<V>(val));}
 
+	void clear() {erase(0, size());}
+
+
 	List<T> operator[] (std::pair<size_t, size_t> range);
 	const List<T> operator[] (std::pair<size_t, size_t> range) const;
 
 	template<typename TT>
 	friend List<TT>* operator+ (List<TT> a, List<TT> b);
+
+	~List();
 private:
 	struct _Node {
 		_Node *next, *prev;
@@ -79,7 +90,7 @@ private:
 
 
 template<typename T>
-List<T>::List() noexcept:
+List<T>::List():
 	_pre_head(new _Node{nullptr, nullptr}),
 	_tail(nullptr),
 	_count(0)
@@ -87,7 +98,7 @@ List<T>::List() noexcept:
 
 template<typename T>
 template<typename V>
-List<T>::List(size_t count, V&& val) noexcept:
+List<T>::List(size_t count, V&& val):
 	List()
 {
 	for(size_t i = 0; i < count; ++i)
@@ -98,7 +109,7 @@ List<T>::List(size_t count, V&& val) noexcept:
 template<typename T>
 template<typename TIter,
 		 typename>
-List<T>::List(TIter begin, TIter end) noexcept :
+List<T>::List(TIter begin, TIter end) :
 	List()
 {
 	for(size_t i = 0; begin != end; ++begin, ++i){
@@ -107,7 +118,7 @@ List<T>::List(TIter begin, TIter end) noexcept :
 }
 
 template<typename T>
-List<T>::List(T *array, size_t count) noexcept:
+List<T>::List(T *array, size_t count) :
 	List()
 {
 	for(size_t i = 0; i < count; ++i)
@@ -116,7 +127,7 @@ List<T>::List(T *array, size_t count) noexcept:
 }
 
 template<typename T>
-List<T>::List(const List<T> &list) noexcept:
+List<T>::List(const List<T> &list) :
 	List()
 {
 	_Node *t = list._pre_head->next;
@@ -125,12 +136,53 @@ List<T>::List(const List<T> &list) noexcept:
 }
 
 template<typename T>
-List<T>::List(List<T> &&list) noexcept:
+List<T>::List(List<T> &&list) :
 	List()
 {
 	_pre_head = list._pre_head;
 	_tail = list._tail;
 	_count = list._count;
+}
+
+template<typename T>
+List<T>::~List()
+{
+	if(size() > 0)
+		erase(0, size());
+}
+
+
+template<typename T>
+List<T> &List<T>::operator=(const List<T> &list)
+{
+	clear();
+	for(_Node *t = list._pre_head->next; t != nullptr; t = t->next){
+		append(t->val);
+	}
+}
+
+template<typename T>
+List<T> &List<T>::operator=(List<T> &&list)
+{
+	clear();
+	_pre_head->next = list._pre_head->next;
+	_tail = list._tail;
+
+	list.clear();
+}
+
+template<typename T>
+bool List<T>::operator== (const List<T> &list) const
+{
+	bool ret = (size() == list.size());
+	for(_Node *t1 = _pre_head->next, *t2 = list._pre_head->next;
+		t1 != nullptr && t2 != nullptr && ret;
+		t1 = t1->next, t2 = t2->next)
+	{
+		ret = (t1->val == t2->val);
+	}
+
+	return ret;
 }
 
 

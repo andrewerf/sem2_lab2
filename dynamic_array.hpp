@@ -288,7 +288,13 @@ void DynamicArray<T>::_allocate(size_t new_capacity)
 			//@TODO: implement different allocation policies
 			new_capacity = _allocated*2;
 		}
-		_array = (T*)realloc(_array, new_capacity);
+
+		T* array = _array;
+		_array = (T*)malloc(new_capacity * sizeof(T));
+		for(size_t i = 0; i < _count; ++i)
+			_assign(i, std::move(array[i]));
+
+		delete[] array;
 		_allocated = new_capacity;
 	}
 }

@@ -82,7 +82,7 @@ template<typename TVal>
 void ArraySequence<T>::_insert(size_t i, TVal &&val)
 {
 	_array->resize(_array->size() + 1);
-	for(size_t j = _array->size() - 1; j >= i; --j)
+	for(size_t j = _array->size() - 1; j > i; --j)
 		_array->set(j, std::move(_array->get(j-1)));
 	_array->set(i, std::forward<TVal>(val));
 }
