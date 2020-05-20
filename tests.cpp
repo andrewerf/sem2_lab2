@@ -228,29 +228,8 @@ int main(){
 		{"where", test_where},
 		{"reduce", test_reduce}
 	};
-	const unsigned short n = sizeof(functions) / sizeof (TestFunction<Error>);
-	unsigned short errors = 0;
 
-	for(unsigned short i = 0; i < n; ++i){
-		printf("[%d/%d] Test %s: ", i+1, n, functions[i].name);
-
-		try {
-			functions[i]();
-			printf("OK");
-		}
-		catch (std::exception &ex) {
-			printf("ERROR!\n");
-			printf("%6c%s", ' ', ex.what());
-			++errors;
-		}
-
-
-		printf("\n");
-	}
-
-	printf("\n\nTotal: tests: %d, errors: %d\n", n, errors);
-	if(errors == 0)
-		printf("ALL OK\n");
+	run_tests(functions, sizeof(functions) / sizeof (TestFunction<void>));
 }
 
 
