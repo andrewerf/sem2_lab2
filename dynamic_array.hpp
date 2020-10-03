@@ -12,8 +12,6 @@
 
 template<typename T>
 class DynamicArray {
-	typedef typename std::remove_reference<T>::type& ref;
-	typedef const typename std::remove_reference<T>::type& const_ref;
 public:
 	DynamicArray();
 	DynamicArray(size_t count);
@@ -40,11 +38,11 @@ public:
 	bool operator!= (const DynamicArray<T> &array) const {return !(array == *this);}
 
 
-	ref get(size_t i) {_check_range(i); return _array[i];}
-	const_ref get(size_t i) const {_check_range(i); return _array[i];}
+	T& get(size_t i) {_check_range(i); return _array[i];}
+	const T& get(size_t i) const {_check_range(i); return _array[i];}
 
-	ref operator[](size_t i) noexcept {return _array[i];}
-	const_ref operator[](size_t i) const noexcept {return _array[i];}
+	T& operator[](size_t i) noexcept {return _array[i];}
+	const T& operator[](size_t i) const noexcept {return _array[i];}
 
 	size_t size() const noexcept {return _count;}
 
@@ -78,6 +76,12 @@ private:
 	size_t _count;
 	size_t _allocated;
 	bool _is_wrapper = false;
+
+public:
+	using iterator = T*;
+
+	iterator begin() {return _array;}
+	iterator end() { return _array + _count;}
 };
 
 
@@ -117,12 +121,18 @@ DynamicArray<T>::DynamicArray(TIter begin, TIter end) :
 
 template<typename T>
 DynamicArray<T>::DynamicArray(T *array, size_t count, bool wrapper) :
-	_array(array),
-	_count(count),
-	_allocated(count),
 	_is_wrapper(wrapper)
 {
-	array = nullptr;
+	if(wrapper){
+		_array = array;
+		_count = count;
+		_allocated = count;
+	}
+	else{
+		resize(count);
+		for(size_t i = 0; i < count; ++i)
+			_assign(i, array[i]);
+	}
 }
 
 template<typename T>

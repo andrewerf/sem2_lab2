@@ -84,6 +84,19 @@ void test_array_sequence_operations()
 	}
 }
 
+void test_array_sequence_iterator()
+{
+	int a[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+	auto s1 = ArraySequence<int>(a, 10, false);
+	auto s2 = ArraySequence<int>();
+
+	for(int k : s1){
+		s2.append(k);
+	}
+
+	for(size_t i = 0; i < s1.size(); ++i)
+		assert_equal(s1[i], s2[i]);
+}
 
 void test_list_basics()
 {
@@ -160,6 +173,21 @@ void test_list_sequence_operations()
 	}
 }
 
+void test_list_sequence_iterator()
+{
+	int a[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+	auto s1 = ListSequence<int>(a, 10);
+	auto s2 = ListSequence<int>();
+
+	for(int k : s1){
+		s2.append(k);
+	}
+
+	for(size_t i = 0; i < s1.size(); ++i)
+		assert_equal(s1[i], s2[i]);
+}
+
+
 
 void test_queue()
 {
@@ -217,11 +245,13 @@ int main(){
 		{"dynamic_array_operations", test_dynamic_array_operations},
 		{"array_sequence_basics", test_array_sequence_basics},
 		{"array_sequence_operations", test_array_sequence_operations},
+		{"array_sequence_iterator", test_array_sequence_iterator},
 
 		{"list_basics", test_list_basics},
 		{"list_operations", test_list_operations},
 		{"list_sequence_basics", test_list_sequence_basics},
 		{"list_sequence_operations", test_list_sequence_operations},
+		{"list_sequence_iterator", test_list_sequence_iterator},
 
 		{"queue", test_queue},
 		{"map", test_map},

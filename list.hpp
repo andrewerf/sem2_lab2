@@ -64,7 +64,6 @@ public:
 
 
 	List<T> operator[] (std::pair<size_t, size_t> range);
-	const List<T> operator[] (std::pair<size_t, size_t> range) const;
 
 	template<typename TT>
 	friend List<TT>* operator+ (List<TT> a, List<TT> b);
@@ -85,6 +84,29 @@ private:
 
 	_Node *_pre_head, *_tail;
 	size_t _count;
+
+public:
+	class iterator : public std::iterator<
+			std::bidirectional_iterator_tag,
+			T,
+			size_t>{
+	public:
+		explicit iterator(_Node *node): _current(node) {}
+		iterator& operator++() {_current = _current->next; return *this;}
+		iterator operator++(int) {iterator ret(_current); ++(*this); return ret;}
+		iterator& operator--() {_current = _current->prev; return *this;}
+		iterator operator--(int) {iterator ret(_current); --(*this); return ret;}
+
+		bool operator==(iterator other) const {return _current == other._current;}
+		bool operator!=(iterator other) const {return not (*this == other);}
+
+		T& operator*() {return _current->val;}
+	private:
+		_Node *_current;
+	};
+
+	iterator begin() {return iterator(_pre_head->next);}
+	iterator end() {return iterator(_tail->next);}
 };
 
 
@@ -144,8 +166,6 @@ List<T>::List(List<T> &&list) :
 	_count = list._count;
 
 	list._count = 0;
-	list._pre_head->next = nullptr;
-	list._tail = nullptr;
 }
 
 template<typename T>
@@ -229,35 +249,18 @@ void List<T>::erase(size_t from, size_t to)
 }
 
 template<typename T>
-const List<T> List<T>::operator[](std::pair<size_t, size_t> range) const
-{
-	_check_range(range.second);
-	_check_range(range.first);
-
-	List ret;
-	ret._pre_head = _getPointer(range.first);
-	ret._tail = _getPointer(range.second - 1);
-	ret._count = range.second - range.first;
-
-	return ret;
-}
-
-template<typename T>
 List<T> List<T>::operator[](std::pair<size_t, size_t> range)
 {
 	_check_range(range.second);
 	_check_range(range.first);
 
 	List ret;
-	_Node *t = _getPointer(range.first);
+	ret._pre_head = _getPointer(range.first)->prev;
+	ret._tail = _getPointer(range.second - 1);
+	ret._count = range.second - range.first;
 
-	for(size_t i = range.first; i < range.second; ++i){
-		ret.append(t->val);
-		t = t->next;
-	}
 	return ret;
 }
-
 
 template<typename T>
 void List<T>::_check_range(size_t i)

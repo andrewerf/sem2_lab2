@@ -9,6 +9,11 @@
 template <typename T>
 class ArraySequence : public Sequence<T> {
 public:
+	using iterator = typename DynamicArray<T>::iterator;
+
+	iterator begin() {return _array->begin();}
+	iterator end() { return _array->end();}
+public:
 	ArraySequence() : _array(new DynamicArray<T>) {}
 
 	template <typename ...Args>
@@ -51,12 +56,12 @@ private:
 
 template<typename T>
 ArraySequence<T>::ArraySequence(const ArraySequence<T> &array) noexcept :
-	_array(new DynamicArray<T>(array._array))
+	_array(new DynamicArray<T>(*array._array))
 {}
 
 template<typename T>
 ArraySequence<T>::ArraySequence(ArraySequence<T>&& array) noexcept :
-	_array(new DynamicArray<T>(std::move(array._array)))
+	_array(new DynamicArray<T>(std::move(*array._array)))
 {}
 
 

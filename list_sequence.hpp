@@ -9,13 +9,18 @@
 template<typename T>
 class ListSequence : public Sequence<T> {
 public:
+	using iterator = typename List<T>::iterator;
+
+	iterator begin() {return _list->begin();}
+	iterator end() { return _list->end();}
+public:
 	ListSequence() : _list(new List<T>) {}
 
 	template <typename ...Args>
 	ListSequence(Args&&... args) : _list(new List<T>(std::forward<Args>(args)...)) {}
 
-	ListSequence(const ListSequence<T> &list) noexcept : _list(new List<T>(list._list)) {}
-	ListSequence(ListSequence<T> &&list) noexcept : _list(new List<T>(std::move(list._list))) {}
+	ListSequence(const ListSequence<T> &list) noexcept : _list(new List<T>(*list._list)) {}
+	ListSequence(ListSequence<T> &&list) noexcept : _list(new List<T>(std::move(*list._list))) {}
 
 	T& get(size_t i) {return _list->get(i);}
 	const T& get(size_t i) const {return _list->get(i);}
@@ -55,11 +60,7 @@ ListSequence<T>::~ListSequence()
 template<typename T>
 Sequence<T>* ListSequence<T>::getSubsequence(size_t from, size_t to) const
 {
-	List<T> s = (*_list)[{from, to}];
-	List<T> *subseq = new List<T>(s);
-	ListSequence<T> *ret = new ListSequence<T>;
-	ret->_list = subseq;
-
+	ListSequence<T> *ret = new ListSequence<T>((*_list)[{from, to}]);
 	return ret;
 }
 

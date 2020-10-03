@@ -3,58 +3,26 @@
 
 #include "dynamic_array.hpp"
 #include "array_sequence.hpp"
+#include "queue.hpp"
+#include "list.hpp"
+#include "list_sequence.hpp"
+
 using namespace std;
 
 
-class Base{
-public:
-	Base()
-	{
-		cout << "Base created\n";
+template <typename Cont>
+std::ostream& operator<< (std::ostream &os, const Cont &a)
+{
+	for(size_t i = 0; i < a.size(); ++i){
+		os << a[i] << " ";
 	}
-
-	Base(int t) :
-		Base()
-	{
-		_t = t;
-	}
-
-	Base(const Base&){
-		cout << "Base const-copied\n";
-	}
-	Base(Base&){
-		cout << "Base moved\n";
-	}
-//	Base(Base&&){
-//		cout << "Base rvalue-copied\n";
-//	}
-
-
-	int _t = 10;
-};
-
-class nBase{
-public:
-	nBase(int k){
-
-	}
-};
-
-template <typename T>
-class Cont{
-public:
-	Cont(T &&val){
-		_val = val;
-	}
-
-private:
-	T _val;
-};
+	return os;
+}
 
 
 int main()
 {
-	Base b;
+//	Base b;
 //	DynamicArray<Base> vec1(10, b);
 //	vec1[3] = b;
 
@@ -64,12 +32,28 @@ int main()
 //	DynamicArray<Base> vec2(std::move(vec1));
 //	ArraySequence<Base> seq(10);
 
-	ArraySequence<int> as(5, 10);
-	as.insert(3, 5);
+	int a[] = {1, 2, 3, 4, 5, 6};
 
-	for(size_t i = 0; i < as.length(); ++i){
-		std::cout << as.get(i) << ' ';
-	}
+	DynamicArray<int> array(a, true);
+	Sequence<int> *seq = new ListSequence<int>(a, 6);
+	auto seq2 = seq->getSubsequence(1, 4);
+	auto seq3 = seq->concat(seq2);
+
+	cout << array;
+
+//	Queue<int> q;
+
+//	vector<Base> vs;
+//	vs.push_back(Base());
+//	DynamicArray<Base> bs(1, Base());
+//	bs.push_back(vs[0]);
+//	ArraySequence<Base> *as = new ArraySequence<Base>;
+//	as->append(Base());
+//	as->insert(3, Base());
+//	as->insert(3, 6);
+
+//	auto t = as->getSubsequence(3, 5);
+//	print(*t);
 
 //	Cont<Base> vec = Cont<Base>(std::forward<Base&&>(Base()));
 
